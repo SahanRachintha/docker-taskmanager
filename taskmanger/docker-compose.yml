@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  mongo: 
+    image: mongo:6.0 
+    container_name: mongo 
+    ports: 
+      - "27017:27017" 
+    volumes: 
+      - mongo-data:/data/db
+
+  backend:
+    build: ./backend/auth
+    container_name: springboot-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/authdb
+
+  frontend:
+    build: ./frontend
+    container_name: react-frontend
+    ports:
+      - "5173:5173"   # maps container 5173 to host 5173
+    depends_on:
+      - backend
+   # volumes:
+   #  - ./frontend:/app   # optional: hot reload
+ 
+
+volumes:
+  mongo-data:
