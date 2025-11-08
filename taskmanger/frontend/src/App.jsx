@@ -2,10 +2,8 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import Login from "./Pages/Login";
 import Signup from "./Pages/Signup";
+import Dashboard from "./Pages/Dashboard";
 
-function Dashboard() {
-  return <h2>Welcome to Dashboard</h2>;
-}
 
 export default function App() {
   return (
