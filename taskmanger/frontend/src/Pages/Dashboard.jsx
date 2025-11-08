@@ -4,7 +4,7 @@ import TaskForm from "../components/TaskForm";
 import TaskList from "../components/TaskList";
 import "./CSS/Dashboard.css";
 
-const API_URL_TASKS = "http://loalhost:8080/api/tasks";
+const API_URL_TASKS = "http://localhost:8080/api/tasks";
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState([]);

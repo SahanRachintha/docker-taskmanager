@@ -9,7 +9,7 @@ import com.example.auth.repository.UserRepository;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000") // allow React frontend
+ // allow React frontend
 public class AuthController {
 
     @Autowired
