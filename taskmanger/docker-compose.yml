@@ -13,7 +13,7 @@ services:
     build: ./backend/auth
     container_name: springboot-backend
     ports:
-      - "8081:8080"
+      - "8080:8080"
     depends_on:
       - mongo
     environment:
