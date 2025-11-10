@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_HUB_USERNAME = 'rachintha'
-        DOCKER_HUB_CREDENTIALS = credentials('dockerhub') 
+        DOCKER_HUB_PASSWORD = credentials('dockerhub') // Use the Jenkins credentials ID
         BACKEND_IMAGE = 'taskmanger-backend'
         FRONTEND_IMAGE = 'taskmanger-frontend'
     }
@@ -12,6 +12,12 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/SahanRachintha/docker-taskmanager.git'
+            }
+        }
+
+        stage('Prepare Backend') {
+            steps {
+                sh 'chmod +x taskmanger/backend/auth/mvnw'
             }
         }
 
@@ -29,14 +35,14 @@ pipeline {
 
         stage('Build Docker Images') {
             steps {
-                sh "docker build -t $DOCKER_HUB_USERNAME/$BACKEND_IMAGE:latest ./taskmanger/backend/auth"
+                sh "docker build -t $DOCKER_HUB_USERNAME/$BACKEND_IMAGE:latest ./taskmanger/backend"
                 sh "docker build -t $DOCKER_HUB_USERNAME/$FRONTEND_IMAGE:latest ./taskmanger/frontend"
             }
         }
 
         stage('Push Docker Images') {
             steps {
-                sh "echo $DOCKER_HUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_CREDENTIALS_USR --password-stdin"
+                sh "echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin"
                 sh "docker push $DOCKER_HUB_USERNAME/$BACKEND_IMAGE:latest"
                 sh "docker push $DOCKER_HUB_USERNAME/$FRONTEND_IMAGE:latest"
             }
