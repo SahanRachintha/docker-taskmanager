@@ -15,7 +15,7 @@ pipeline {
 
         stage('Build Backend') {
             steps {
-                sh 'cd taskmanger/backend && ./mvnw clean package -DskipTests'
+                sh 'cd taskmanger/backend && mvn clean package -DskipTests'
             }
         }
 
