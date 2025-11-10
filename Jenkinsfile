@@ -35,7 +35,8 @@ pipeline {
 
         stage('Build Docker Images') {
             steps {
-                sh "docker build -t $DOCKER_HUB_USERNAME/$BACKEND_IMAGE:latest ./taskmanger/backend"
+                // Use correct Dockerfile path for backend
+                sh "docker build -t $DOCKER_HUB_USERNAME/$BACKEND_IMAGE:latest ./taskmanger/backend/auth"
                 sh "docker build -t $DOCKER_HUB_USERNAME/$FRONTEND_IMAGE:latest ./taskmanger/frontend"
             }
         }
