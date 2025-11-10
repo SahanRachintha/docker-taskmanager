@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         DOCKER_HUB_USERNAME = 'rachintha'
-        DOCKER_HUB_PASSWORD = credentials('dockerhub') // Use the Jenkins credentials ID
         BACKEND_IMAGE = 'taskmanger-backend'
         FRONTEND_IMAGE = 'taskmanger-frontend'
     }
@@ -35,26 +34,32 @@ pipeline {
 
         stage('Build Docker Images') {
             steps {
-                // Use correct Dockerfile path for backend
-                sh "docker build -t $DOCKER_HUB_USERNAME/$BACKEND_IMAGE:latest ./taskmanger/backend/auth"
+                // Build backend image using Dockerfile inside auth folder
+                sh "docker build -t $DOCKER_HUB_USERNAME/$BACKEND_IMAGE:latest -f taskmanger/backend/auth/Dockerfile ./taskmanger/backend/auth"
+                // Build frontend image
                 sh "docker build -t $DOCKER_HUB_USERNAME/$FRONTEND_IMAGE:latest ./taskmanger/frontend"
             }
         }
 
         stage('Push Docker Images') {
             steps {
-                sh "echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin"
-                sh "docker push $DOCKER_HUB_USERNAME/$BACKEND_IMAGE:latest"
-                sh "docker push $DOCKER_HUB_USERNAME/$FRONTEND_IMAGE:latest"
+                // Secure login using credentials stored in Jenkins
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
+                    sh "docker push \$DOCKER_USER/$BACKEND_IMAGE:latest"
+                    sh "docker push \$DOCKER_USER/$FRONTEND_IMAGE:latest"
+                }
             }
         }
 
         stage('Run Docker Containers') {
             steps {
+                // Remove old containers if exist
                 sh "docker rm -f $BACKEND_IMAGE || true"
                 sh "docker rm -f $FRONTEND_IMAGE || true"
-                sh "docker run -d --name $BACKEND_IMAGE -p 8080:8080 $DOCKER_HUB_USERNAME/$BACKEND_IMAGE:latest"
-                sh "docker run -d --name $FRONTEND_IMAGE -p 5173:5173 $DOCKER_HUB_USERNAME/$FRONTEND_IMAGE:latest"
+                // Run new containers
+                sh "docker run -d --name $BACKEND_IMAGE -p 8080:8080 \$DOCKER_HUB_USERNAME/$BACKEND_IMAGE:latest"
+                sh "docker run -d --name $FRONTEND_IMAGE -p 5173:5173 \$DOCKER_HUB_USERNAME/$FRONTEND_IMAGE:latest"
             }
         }
     }
