@@ -59,7 +59,7 @@ pipeline {
                 sh "docker rm -f $FRONTEND_IMAGE || true"
                 // Run new containers
                 sh "docker run -d --name $BACKEND_IMAGE -p 8081:8080 \$DOCKER_HUB_USERNAME/$BACKEND_IMAGE:latest"
-                sh "docker run -d --name $FRONTEND_IMAGE -p 5173:5173 \$DOCKER_HUB_USERNAME/$FRONTEND_IMAGE:latest"
+                sh "docker run -d --name $FRONTEND_IMAGE -p 5174:5173 \$DOCKER_HUB_USERNAME/$FRONTEND_IMAGE:latest"
             }
         }
     }
