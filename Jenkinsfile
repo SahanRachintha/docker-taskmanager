@@ -5,9 +5,12 @@ pipeline {
         DOCKER_HUB_USERNAME = 'rachintha'
         BACKEND_IMAGE = 'taskmanger-backend'
         FRONTEND_IMAGE = 'taskmanger-frontend'
+        EC2_USER = 'ubuntu'
+        EC2_HOST = '3.238.255.79'   // 👈 replace if IP changes
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/SahanRachintha/docker-taskmanager.git'
@@ -34,16 +37,13 @@ pipeline {
 
         stage('Build Docker Images') {
             steps {
-                // Build backend image using Dockerfile inside auth folder
                 sh "docker build -t $DOCKER_HUB_USERNAME/$BACKEND_IMAGE:latest -f taskmanger/backend/auth/Dockerfile ./taskmanger/backend/auth"
-                // Build frontend image
                 sh "docker build -t $DOCKER_HUB_USERNAME/$FRONTEND_IMAGE:latest ./taskmanger/frontend"
             }
         }
 
         stage('Push Docker Images') {
             steps {
-                // Secure login using credentials stored in Jenkins
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
                     sh "docker push \$DOCKER_USER/$BACKEND_IMAGE:latest"
@@ -52,14 +52,43 @@ pipeline {
             }
         }
 
-        stage('Run Docker Containers') {
+        stage('Deploy to AWS EC2') {
             steps {
-                // Remove old containers if exist
-                sh "docker rm -f $BACKEND_IMAGE || true"
-                sh "docker rm -f $FRONTEND_IMAGE || true"
-                // Run new containers
-                sh "docker run -d --name $BACKEND_IMAGE -p 8081:8080 \$DOCKER_HUB_USERNAME/$BACKEND_IMAGE:latest"
-                sh "docker run -d --name $FRONTEND_IMAGE -p 5174:5173 \$DOCKER_HUB_USERNAME/$FRONTEND_IMAGE:latest"
+                sshagent(['aws-ec2-ssh']) {
+                    sh """
+                    ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST '
+
+                      docker network create taskmanager-network || true
+
+                      docker rm -f mongo || true
+                      docker rm -f taskmanger-backend || true
+                      docker rm -f taskmanger-frontend || true
+
+                      docker pull rachintha/taskmanger-backend:latest
+                      docker pull rachintha/taskmanger-frontend:latest
+
+                      docker run -d \
+                        --name mongo \
+                        --network taskmanager-network \
+                        -p 27017:27017 \
+                        -e MONGO_INITDB_DATABASE=authdb \
+                        mongo:6.0
+
+                      docker run -d \
+                        --name taskmanger-backend \
+                        --network taskmanager-network \
+                        -p 8081:8080 \
+                        rachintha/taskmanger-backend:latest
+
+                      docker run -d \
+                        --name taskmanger-frontend \
+                        --network taskmanager-network \
+                        -p 5174:5173 \
+                        -e REACT_APP_BACKEND_URL=http://taskmanger-backend:8080 \
+                        rachintha/taskmanger-frontend:latest
+                    '
+                    """
+                }
             }
         }
     }
@@ -70,3 +99,4 @@ pipeline {
         }
     }
 }
+
