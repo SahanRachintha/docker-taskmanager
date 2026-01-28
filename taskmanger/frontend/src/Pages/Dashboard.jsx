@@ -4,7 +4,7 @@ import TaskForm from "../components/TaskForm";
 import TaskList from "../components/TaskList";
 import "./CSS/Dashboard.css";
 
-const API_URL_TASKS = "http://springboot-backend:8080/api/tasks";
+const API_URL_TASKS = "http://3.238.255.79:8081/api/tasks";
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
