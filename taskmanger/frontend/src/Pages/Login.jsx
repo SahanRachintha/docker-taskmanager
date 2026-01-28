@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import './CSS/Login.css';
 
-const API_URL = "http://springboot-backend:8080/api/auth";
+const API_URL = "http://3.238.255.79:8081/api/auth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
