@@ -104,7 +104,7 @@ export default function Dashboard() {
 
       <main className="dashboard-main">
         <section className="left">
-          <h2>Add Task</h2>
+          <h2>Add Tasks</h2>
           <TaskForm onSubmit={createTask} />
         </section>
 
