@@ -109,7 +109,7 @@ export default function Dashboard() {
         </section>
 
         <section className="right">
-          <h2>Tasks</h2>
+          <h2>tasks</h2>
           {error && <p className="error">{error}</p>}
           {loading ? (
             <p>Loading tasks...</p>
