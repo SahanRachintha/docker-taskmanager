@@ -6,7 +6,7 @@ pipeline {
         BACKEND_IMAGE = 'taskmanger-backend'
         FRONTEND_IMAGE = 'taskmanger-frontend'
         EC2_USER = 'ubuntu'
-        EC2_HOST = '3.238.255.79'   // 👈 replace if IP changes
+        EC2_HOST = '3.238.255.79'
     }
 
     stages {
@@ -58,11 +58,13 @@ pipeline {
                     sh """
                     ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST '
 
-                      docker network create taskmanager-network || true
-
                       docker rm -f mongo || true
                       docker rm -f taskmanger-backend || true
                       docker rm -f taskmanger-frontend || true
+                      docker system prune -a -f || true
+                      docker volume prune -f || true
+
+                      docker network create taskmanager-network || true
 
                       docker pull rachintha/taskmanger-backend:latest
                       docker pull rachintha/taskmanger-frontend:latest
@@ -99,4 +101,3 @@ pipeline {
         }
     }
 }
-
