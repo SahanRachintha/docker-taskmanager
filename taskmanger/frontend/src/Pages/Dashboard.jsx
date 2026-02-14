@@ -96,7 +96,7 @@ export default function Dashboard() {
   return (
     <div className="dashboard-page">
       <nav className="topbar">
-        <h1>TaskManager</h1>
+        <h1>task manager</h1>
         <button className="logout-btn" onClick={handleLogout}>
           Logout
         </button>
